@@ -9,6 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tharga.PowerScan.Console", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{09FB7D4A-F554-49B3-AE4F-DEECA2C2ED4E}"
 	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
 		License.txt = License.txt
 		readme.md = readme.md
 	EndProjectSection
