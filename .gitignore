@@ -1,0 +1,14 @@
+.vs
+node_modules
+bin
+obj
+Eplicta-Manager.sln.DotSettings.user
+_ReSharper.Caches/
+package-lock.json
+
+*.DotSettings.user
+*.ncrunchsolution.user
+*.orig
+
+_NCrunch*
+*.ncrunchsolution

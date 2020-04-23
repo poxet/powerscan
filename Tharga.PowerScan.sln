@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tharga.PowerScan", "Tharga.PowerScan\Tharga.PowerScan.csproj", "{3EB97A6C-D172-4F85-BC4A-DDE2A439C5E0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tharga.PowerScan.Console", "Tharga.PowerScan.Console\Tharga.PowerScan.Console.csproj", "{CC35E823-BC15-46FA-AD7F-7BD0F7251F72}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{09FB7D4A-F554-49B3-AE4F-DEECA2C2ED4E}"
+	ProjectSection(SolutionItems) = preProject
+		License.txt = License.txt
+		readme.md = readme.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3EB97A6C-D172-4F85-BC4A-DDE2A439C5E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EB97A6C-D172-4F85-BC4A-DDE2A439C5E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EB97A6C-D172-4F85-BC4A-DDE2A439C5E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EB97A6C-D172-4F85-BC4A-DDE2A439C5E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC35E823-BC15-46FA-AD7F-7BD0F7251F72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC35E823-BC15-46FA-AD7F-7BD0F7251F72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC35E823-BC15-46FA-AD7F-7BD0F7251F72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC35E823-BC15-46FA-AD7F-7BD0F7251F72}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0CD2353D-153A-4CBE-A6F7-785F9269EBB1}
+	EndGlobalSection
+EndGlobal

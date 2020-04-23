@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Castle.Windsor" Version="5.0.1" />
+    <PackageReference Include="Tharga.Toolkit.Console" Version="3.0.67" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tharga.PowerScan\Tharga.PowerScan.csproj" />
+  </ItemGroup>
+
+</Project>
