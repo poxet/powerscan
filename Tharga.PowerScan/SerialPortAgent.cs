@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO.Ports;
 using System.Threading.Tasks;
+using System.Timers;
 using Tharga.PowerScan.Entities;
 using Tharga.PowerScan.Entities.Args;
 using Tharga.PowerScan.Interfaces;
@@ -18,9 +19,11 @@ namespace Tharga.PowerScan
         public SerialPortAgent(Configuration configuration)
         {
             _configuration = configuration;
+            MonitorConnectionState();
         }
 
         public bool IsOpen => _serialPort != null && _serialPort.IsOpen;
+        private bool _lastOpenState;
         public string PortName => _configuration.PortName;
 
         public event EventHandler<ButtonPressedEventArgs> ButtonPressedEvent;
@@ -28,6 +31,7 @@ namespace Tharga.PowerScan
         public event EventHandler<ScanEventArgs> ScanEvent;
         public event EventHandler<ScanConfirmationNotreceivedEventArgs> ScanConfirmationNotreceivedEvent;
         public event EventHandler<SignalChangedEventArgs> SignalChangedEvent;
+        public event EventHandler<ConnectionChangedEventArgs> ConnectionChangedEvent;
 
         public void Open()
         {
@@ -42,6 +46,7 @@ namespace Tharga.PowerScan
             _serialPort.PinChanged += _serialPort_PinChanged;
             _serialPort.ErrorReceived += _serialPort_ErrorReceived;
             _serialPort.DataReceived += SerialPortDataReceived;
+            _serialPort.Disposed += _serialPort_Disposed;
             _serialPort.Open();
             _hasSignal = true;
 
@@ -50,6 +55,18 @@ namespace Tharga.PowerScan
             //This is timeout is what should be used here. Ask the scanner for this setting and assign this variable.
             //Decrease the value a little bit, so that there is time for the code to execute. Perhaps 500ms or so.
             _responseTimeoutInMilliseconds = 3000;
+        }
+
+        private void MonitorConnectionState()
+        {
+            var timer = new Timer {Interval = 3000};
+            timer.Elapsed += (s, e) =>
+            {
+                if (_lastOpenState == IsOpen) return;
+                _lastOpenState = IsOpen;
+                ConnectionChangedEvent?.Invoke(this, new ConnectionChangedEventArgs(IsOpen ? ConnectionChangedEventArgs.ConnectionStatus.Open : ConnectionChangedEventArgs.ConnectionStatus.Closed, _configuration.PortName));
+            };
+            timer.Start();
         }
 
         public void Close()
@@ -99,6 +116,11 @@ namespace Tharga.PowerScan
                     ScanAction(sender, data);
                     break;
             }
+        }
+
+        private void _serialPort_Disposed(object sender, EventArgs e)
+        {
+            //Debug.WriteLine("_serialPort_Disposed");
         }
 
         private void ButtonPressedAction(object sender, Button button)
@@ -177,7 +199,7 @@ namespace Tharga.PowerScan
 
         private void _serialPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
-            Console.WriteLine("_serialPort_ErrorReceived");
+            //Debug.WriteLine("_serialPort_ErrorReceived");
         }
     }
 }

@@ -48,20 +48,19 @@ namespace Tharga.PowerScan
         public void Open()
         {
             if (IsOpen) throw new InvalidOperationException("The port is already open.");
-            SerialPortAgent.Open();
             SerialPortAgent.ScanEvent += ScanEvent;
             SerialPortAgent.ScanConfirmationNotreceivedEvent += ScanConfirmationNotreceivedEvent;
             SerialPortAgent.ButtonPressedEvent += ButtonPressedEvent;
             SerialPortAgent.ButtonConfirmationNotreceivedEvent += ButtonConfirmationNotreceivedEvent;
             SerialPortAgent.SignalChangedEvent += SignalChangedEvent;
-            OnConnectionChangedEvent(new ConnectionChangedEventArgs(ConnectionChangedEventArgs.ConnectionStatus.Open, SerialPortAgent.PortName));
+            SerialPortAgent.ConnectionChangedEvent += ConnectionChangedEvent;
+            SerialPortAgent.Open();
         }
 
         public void Close()
         {
             if (!IsOpen) throw new InvalidOperationException("The port is not open.");
             SerialPortAgent.Close();
-            OnConnectionChangedEvent(new ConnectionChangedEventArgs(ConnectionChangedEventArgs.ConnectionStatus.Closed, "N/A"));
         }
 
         public void Dispose()
@@ -77,11 +76,6 @@ namespace Tharga.PowerScan
             }
 
             SerialPortAgent.Dispose();
-        }
-
-        protected virtual void OnConnectionChangedEvent(ConnectionChangedEventArgs e)
-        {
-            ConnectionChangedEvent?.Invoke(this, e);
         }
     }
 }
