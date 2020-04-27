@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using Tharga.PowerScan.Interfaces;
-using Tharga.PowerScan.Types;
 using Tharga.Toolkit.Console.Commands.Base;
 
 namespace Tharga.PowerScan.Console.ConsoleCommands.Configure
@@ -11,7 +10,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Configure
         private readonly Time _time;
 
         public TimeConsoleCommand(IConnection connection)
-            : base("Time", "Set time in the unit")
+            : base("Time", "Set scanner to current time and date.")
         {
             _connection = connection;
             _time = new Time(connection);
@@ -26,15 +25,8 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Configure
 
         public override void Invoke(string[] param)
         {
-            var index = 0;
-            var time = QueryParam("Time", GetParam(param, index++), new Dictionary<TimeSet, string>
-            {
-                {TimeSet.Date, TimeSet.Date.ToString()},
-                {TimeSet.Time, TimeSet.Time.ToString()},
-                {TimeSet.CurrentTime, TimeSet.CurrentTime.ToString()}
-            });
-
-            _time.ChangeTime(time);
+            var time = DateTime.Now;
+            _time.SetTimeAndDate(time);
         }
     }
 }
