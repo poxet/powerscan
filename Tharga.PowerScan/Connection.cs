@@ -32,6 +32,12 @@ namespace Tharga.PowerScan
         public event EventHandler<ButtonConfirmationNotreceivedEventArgs> ButtonConfirmationNotreceivedEvent;
         public event EventHandler<SignalChangedEventArgs> SignalChangedEvent;
 
+        public string RawCommand(string command)
+        {
+            command = command.Replace("[ESC]", Constants.Esc);
+            return SerialPortAgent.Command(command);
+        }
+
         public void Open(Configuration configuration)
         {
             if (IsOpen) throw new InvalidOperationException("The port is already open.");

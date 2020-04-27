@@ -18,6 +18,10 @@ namespace Tharga.PowerScan.Entities
                 {
                     PortName = ports.Single();
                 }
+                else if (ports.Length > 1)
+                {
+                    PortName = "Auto";
+                }
             }
         }
 

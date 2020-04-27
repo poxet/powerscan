@@ -15,6 +15,8 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Connection
             : base("Open", "Opens a connection.")
         {
             _connection = connection;
+
+            this.RegisterQuery("Port", "Port", () => { return SerialPort.GetPortNames().Select(x => new KeyValuePair<string, string>(x, x)); });
         }
 
         public override bool CanExecute(out string reasonMessage)
@@ -30,7 +32,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Connection
 
         public override void Invoke(string[] param)
         {
-            var portName = QueryParam("Port", param, SerialPort.GetPortNames().Select(x => new KeyValuePair<string, string>(x, x)));
+            var portName = GetParam<string>("Port");
             _connection.Open(new Configuration(portName));
         }
     }

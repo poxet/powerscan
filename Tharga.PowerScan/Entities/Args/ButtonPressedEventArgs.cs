@@ -24,7 +24,7 @@ namespace Tharga.PowerScan.Entities.Args
             if (_waitStatus == WaitStatus.DoneWaiting) throw new TimeoutException("The confirm message came too late. The scanner has already given up waiting.");
 
             _isSuccess = isSuccess;
-            _confirmationMessage = confirmationMessage ?? throw new InvalidOperationException("Cannot use null as confirmation message. Use 'string.Empty' if nothing is to be displayed on the scanner.");
+            _confirmationMessage = confirmationMessage; // ?? throw new InvalidOperationException("Cannot use null as confirmation message. Use 'string.Empty' if nothing is to be displayed on the scanner.");
             _confirmEvent.Set();
         }
 

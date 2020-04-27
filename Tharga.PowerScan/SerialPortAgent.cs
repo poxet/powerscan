@@ -35,20 +35,30 @@ namespace Tharga.PowerScan
 
         public void Open()
         {
-            _serialPort = new SerialPort(_configuration.PortName)
+            var port = _configuration.PortName;
+            if (port == "Auto")
             {
-                Parity = _configuration.Parity,
-                BaudRate = _configuration.BaudRate,
-                StopBits = _configuration.StopBits,
-                DataBits = _configuration.DataBits
-            };
+                var ports = SerialPort.GetPortNames();
+                foreach (var p in ports)
+                {
+                    _serialPort = Start(p);
+                    if (_serialPort != null)
+                        break;
+                }
 
-            _serialPort.PinChanged += _serialPort_PinChanged;
-            _serialPort.ErrorReceived += _serialPort_ErrorReceived;
-            _serialPort.DataReceived += SerialPortDataReceived;
-            _serialPort.Disposed += _serialPort_Disposed;
-            _serialPort.Open();
+                if (_serialPort == null)
+                {
+                    Console.WriteLine("Could not automatically connect.");
+                    return;
+                }
+            }
+            else
+            {
+                _serialPort = Start(port);
+            }
+
             _hasSignal = true;
+            SendConnectionChanged();
 
             //TODO: Query the settings of the scanner.
             //When a barcode is read, the scanner waits for a while before it gives up waiting for a response.
@@ -57,22 +67,63 @@ namespace Tharga.PowerScan
             _responseTimeoutInMilliseconds = 3000;
         }
 
+        private SerialPort Start(string port)
+        {
+            SerialPort serialPort = null;
+            try
+            {
+                serialPort = new SerialPort(port)
+                {
+                    Parity = _configuration.Parity,
+                    BaudRate = _configuration.BaudRate,
+                    StopBits = _configuration.StopBits,
+                    DataBits = _configuration.DataBits
+                };
+                serialPort.Open();
+                serialPort.Write($"$+$!{Constants.End}");
+                System.Threading.Thread.Sleep(100);
+                var result = serialPort.ReadExisting();
+                if (result.StartsWith("BC"))
+                {
+                    Console.WriteLine(result);
+                    serialPort.PinChanged += _serialPort_PinChanged;
+                    serialPort.ErrorReceived += _serialPort_ErrorReceived;
+                    serialPort.DataReceived += SerialPortDataReceived;
+                    serialPort.Disposed += _serialPort_Disposed;
+                    return serialPort;
+                }
+
+                serialPort.Close();
+                serialPort.Dispose();
+                return null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                serialPort?.Dispose();
+                return null;
+            }
+        }
+
         private void MonitorConnectionState()
         {
             var timer = new Timer {Interval = 3000};
-            timer.Elapsed += (s, e) =>
-            {
-                if (_lastOpenState == IsOpen) return;
-                _lastOpenState = IsOpen;
-                ConnectionChangedEvent?.Invoke(this, new ConnectionChangedEventArgs(IsOpen ? ConnectionChangedEventArgs.ConnectionStatus.Open : ConnectionChangedEventArgs.ConnectionStatus.Closed, _configuration.PortName));
-            };
+            timer.Elapsed += (s, e) => { SendConnectionChanged(); };
             timer.Start();
+        }
+
+        private void SendConnectionChanged()
+        {
+            if (_lastOpenState == IsOpen) return;
+            _lastOpenState = IsOpen;
+            ConnectionChangedEvent?.Invoke(this, new ConnectionChangedEventArgs(IsOpen ? ConnectionChangedEventArgs.ConnectionStatus.Open : ConnectionChangedEventArgs.ConnectionStatus.Closed, _configuration.PortName));
         }
 
         public void Close()
         {
             _serialPort.Close();
             _hasSignal = false;
+            SendConnectionChanged();
         }
 
         public void Write(string data)
@@ -80,9 +131,11 @@ namespace Tharga.PowerScan
             _serialPort.Write(data);
         }
 
-        public void Command(string data)
+        public string Command(string data)
         {
             Write(data + Constants.End);
+            var result = _serialPort.ReadExisting();
+            return result;
         }
 
         public void Dispose()
@@ -131,8 +184,9 @@ namespace Tharga.PowerScan
             var response = buttonPressedEventArgs.Wait(_responseTimeoutInMilliseconds);
             if (response.ConfirmationReceived)
             {
-                _serialPort.Write("OK\x0d");
-                _serialPort.Write(response.ConfirmationMessage.TextCommandData + Constants.End);
+                _serialPort.Write($"OK{Constants.End}");
+                if (response.ConfirmationMessage != null)
+                    _serialPort.Write(response.ConfirmationMessage.TextCommandData + Constants.End);
 
                 if (!response.IsSuccess)
                 {
@@ -153,7 +207,7 @@ namespace Tharga.PowerScan
             var response = scanEventArgs.Wait(_responseTimeoutInMilliseconds);
             if (response.ConfirmationReceived)
             {
-                _serialPort.Write("OK\x0d");
+                _serialPort.Write($"OK{Constants.End}");
                 _serialPort.Write(response.ConfirmationMessage.TextCommandData + Constants.End);
 
                 if (!response.IsSuccess)
