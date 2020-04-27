@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using Tharga.PowerScan.Entities;
 using Tharga.PowerScan.Entities.Args;
 using Tharga.PowerScan.Interfaces;
@@ -32,10 +33,10 @@ namespace Tharga.PowerScan
         public event EventHandler<ButtonConfirmationNotreceivedEventArgs> ButtonConfirmationNotreceivedEvent;
         public event EventHandler<SignalChangedEventArgs> SignalChangedEvent;
 
-        public string RawCommand(string command)
+        public void Command(string command)
         {
             command = command.Replace("[ESC]", Constants.Esc);
-            return SerialPortAgent.Command(command);
+            SerialPortAgent.Command(command);
         }
 
         public void Open(Configuration configuration)

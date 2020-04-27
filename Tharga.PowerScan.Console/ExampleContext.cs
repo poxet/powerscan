@@ -36,7 +36,8 @@ namespace Tharga.PowerScan.Console
         {
             try
             {
-                _console.OutputEvent("Data received from scanner: " + e.Data);
+                //_console.OutputEvent("Data received from scanner: " + e.Data);
+                _console.OutputEvent(e.Data);
                 var displayText = new DisplayText();
                 displayText.SetText(2, "S: " + e.Data, DisplayText.FontSize.Normal);
                 e.Confirm(displayText, true);

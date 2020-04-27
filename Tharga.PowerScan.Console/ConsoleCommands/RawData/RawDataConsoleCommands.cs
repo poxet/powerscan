@@ -4,7 +4,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.RawData
 {
     internal class RawDataConsoleCommands : ContainerCommandBase
     {
-        public RawDataConsoleCommands() 
+        public RawDataConsoleCommands()
             : base("Raw")
         {
             RegisterCommand<RawDataSendConsoleCommand>();

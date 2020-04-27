@@ -7,7 +7,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.RawData
     {
         private readonly IConnection _connection;
 
-        public RawDataSendConsoleCommand(IConnection connection) 
+        public RawDataSendConsoleCommand(IConnection connection)
             : base("Send")
         {
             _connection = connection;
@@ -16,8 +16,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.RawData
         public override void Invoke(string[] param)
         {
             var data = QueryParam<string>("Command", param);
-            var result = _connection.RawCommand(data);
-            OutputInformation(result);
+            _connection.Command(data);
         }
     }
 }

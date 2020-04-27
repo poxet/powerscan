@@ -16,6 +16,6 @@ namespace Tharga.PowerScan.Interfaces
         void Open();
         void Close();
         void Write(string data);
-        string Command(string data);
+        void Command(string data);
     }
 }

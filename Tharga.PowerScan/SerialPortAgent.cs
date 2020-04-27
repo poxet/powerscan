@@ -1,11 +1,12 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using Tharga.PowerScan.Entities;
 using Tharga.PowerScan.Entities.Args;
 using Tharga.PowerScan.Interfaces;
 using Tharga.PowerScan.Types;
+using Timer = System.Timers.Timer;
 
 namespace Tharga.PowerScan
 {
@@ -24,6 +25,7 @@ namespace Tharga.PowerScan
 
         public bool IsOpen => _serialPort != null && _serialPort.IsOpen;
         private bool _lastOpenState;
+        private string _buffer;
         public string PortName => _configuration.PortName;
 
         public event EventHandler<ButtonPressedEventArgs> ButtonPressedEvent;
@@ -131,12 +133,35 @@ namespace Tharga.PowerScan
             _serialPort.Write(data);
         }
 
-        public string Command(string data)
+        public void Command(string data)
         {
             Write(data + Constants.End);
-            var result = _serialPort.ReadExisting();
-            return result;
         }
+
+        //public string RaWCommand(string data, TimeSpan timeout)
+        //{
+        //    try
+        //    {
+        //        _response = null;
+        //        _interruptResponse = new AutoResetEvent(false);
+
+        //        Write(data + Constants.End);
+
+        //        _interruptResponse.WaitOne(timeout);
+
+        //        return _response;
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine(e);
+        //        throw;
+        //    }
+        //    finally
+        //    {
+        //        _interruptResponse?.Dispose();
+        //        _interruptResponse = null;
+        //    }
+        //}
 
         public void Dispose()
         {
@@ -145,29 +170,34 @@ namespace Tharga.PowerScan
 
         private void SerialPortDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            var data = _serialPort.ReadExisting();
-            data = data.Substring(0, data.Length - 1);
+            _buffer += _serialPort.ReadExisting();
 
-            switch (data)
+            if (_buffer.EndsWith("\r"))
             {
-                case "S1":
-                case "F1":
-                    ButtonPressedAction(sender, Button.F1);
-                    break;
-                case "S2":
-                case "F2":
-                    ButtonPressedAction(sender, Button.F2);
-                    break;
-                case "Up":
-                    ButtonPressedAction(sender, Button.Up);
-                    break;
-                case "Dwn":
-                case "Down":
-                    ButtonPressedAction(sender, Button.Down);
-                    break;
-                default:
-                    ScanAction(sender, data);
-                    break;
+                var data = _buffer.TrimEnd('\r');
+                _buffer = null;
+
+                switch (data)
+                {
+                    case "S1":
+                    case "F1":
+                        ButtonPressedAction(sender, Button.F1);
+                        break;
+                    case "S2":
+                    case "F2":
+                        ButtonPressedAction(sender, Button.F2);
+                        break;
+                    case "Up":
+                        ButtonPressedAction(sender, Button.Up);
+                        break;
+                    case "Dwn":
+                    case "Down":
+                        ButtonPressedAction(sender, Button.Down);
+                        break;
+                    default:
+                        ScanAction(sender, data);
+                        break;
+                }
             }
         }
 
