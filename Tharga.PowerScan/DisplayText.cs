@@ -108,6 +108,11 @@ namespace Tharga.PowerScan
             }
         }
 
+        public string GetText(int lineNumber)
+        {
+            return _lines[lineNumber].Item2;
+        }
+
         public void SetText(int lineNumber, string data, FontSize fontSize, bool truncate = true)
         {
             if (lineNumber < 0 && !truncate) throw new InvalidOperationException("The line number needs to be at least 0.");
