@@ -16,12 +16,13 @@ namespace Tharga.PowerScan.Console
             var configuration = new Configuration();
             Connection = new Connection(configuration);
 
-            Connection.ScanEvent += ScanEvent;
-            Connection.ButtonPressedEvent += ButtonPressedEvent;
-            //powerScanConnection.SignalChangedEvent += SignalChangedEvent;
-            Connection.ConnectionChangedEvent += ConnectionChangedEvent;
-            //powerScanConnection.ButtonConfirmationNotreceivedEvent += PowerScanConnection_ButtonConfirmationNotreceivedEvent;
-            //powerScanConnection.ScanConfirmationNotreceivedEvent += PowerScanConnection_ScanConfirmationNotreceivedEvent;
+            Connection.ScanEvent += OnScanEvent;
+            Connection.ButtonPressedEvent += OnButtonPressedEvent;
+            Connection.SignalChangedEvent += OnSignalChangedEvent;
+            Connection.ConnectionChangedEvent += OnConnectionChangedEvent;
+            Connection.ButtonConfirmationNotreceivedEvent += OnButtonConfirmationNotreceivedEvent;
+            Connection.ScanConfirmationNotreceivedEvent += OnScanConfirmationNotreceivedEvent;
+            Connection.MessageEvent += OnMessageEvent;
             if (!string.IsNullOrEmpty(Connection.OpenPortName))
             {
                 Connection.Open(configuration);
@@ -32,12 +33,40 @@ namespace Tharga.PowerScan.Console
             }
         }
 
-        private void ScanEvent(object sender, ScanEventArgs e)
+        public IConnection Connection { get; }
+
+        private void OnScanConfirmationNotreceivedEvent(object sender, ScanConfirmationNotreceivedEventArgs e)
+        {
+            _console.OutputEvent($"Scan: {e.Data}");
+        }
+
+        private void OnButtonConfirmationNotreceivedEvent(object sender, ButtonConfirmationNotreceivedEventArgs e)
+        {
+            _console.OutputEvent($"Button: {e.Button}");
+        }
+
+        private void OnSignalChangedEvent(object sender, SignalChangedEventArgs e)
+        {
+            _console.OutputEvent($"Signal changed to {e.State}.");
+        }
+
+        private void OnMessageEvent(object sender, MessageEventArgs e)
+        {
+            if (e.Exception != null)
+            {
+                _console.OutputError(e.Exception);
+            }
+            else
+            {
+                _console.OutputInformation(e.Message);
+            }
+        }
+
+        private void OnScanEvent(object sender, ScanEventArgs e)
         {
             try
             {
-                //_console.OutputEvent("Data received from scanner: " + e.Data);
-                _console.OutputEvent(e.Data);
+                _console.OutputEvent("OnScanEvent: " + e.Data);
                 var displayText = new DisplayText();
                 displayText.SetText(2, "S: " + e.Data, DisplayText.FontSize.Normal);
                 e.Confirm(displayText, true);
@@ -48,14 +77,14 @@ namespace Tharga.PowerScan.Console
             }
         }
 
-        private void ButtonPressedEvent(object sender, ButtonPressedEventArgs e)
+        private void OnButtonPressedEvent(object sender, ButtonPressedEventArgs e)
         {
             try
             {
-                _console.OutputEvent("Button pressed: " + e.Button);
+                _console.OutputEvent("OnButtonPressedEvent: " + e.Button);
                 var displayText = new DisplayText();
                 displayText.SetText(3, "B: " + e.Button, DisplayText.FontSize.Normal);
-                e.Confirm(null, true);
+                e.Confirm(displayText, true);
             }
             catch (Exception exception)
             {
@@ -63,13 +92,11 @@ namespace Tharga.PowerScan.Console
             }
         }
 
-        public IConnection Connection { get; }
-
-        private void ConnectionChangedEvent(object sender, ConnectionChangedEventArgs e)
+        private void OnConnectionChangedEvent(object sender, ConnectionChangedEventArgs e)
         {
             try
             {
-                _console.OutputEvent("Connection changed. " + e.Connection + ", port: " + e.PortName);
+                _console.OutputEvent($"Connection changed. {e.Connection}, port: {e.PortName}");
             }
             catch (Exception exception)
             {

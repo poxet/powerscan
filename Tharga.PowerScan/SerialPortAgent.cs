@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO.Ports;
-using System.Threading;
 using System.Threading.Tasks;
 using Tharga.PowerScan.Entities;
 using Tharga.PowerScan.Entities.Args;
@@ -26,6 +25,7 @@ namespace Tharga.PowerScan
         public bool IsOpen => _serialPort != null && _serialPort.IsOpen;
         private bool _lastOpenState;
         private string _buffer;
+        private bool _waitingForResponse;
         public string PortName => _configuration.PortName;
 
         public event EventHandler<ButtonPressedEventArgs> ButtonPressedEvent;
@@ -34,6 +34,7 @@ namespace Tharga.PowerScan
         public event EventHandler<ScanConfirmationNotreceivedEventArgs> ScanConfirmationNotreceivedEvent;
         public event EventHandler<SignalChangedEventArgs> SignalChangedEvent;
         public event EventHandler<ConnectionChangedEventArgs> ConnectionChangedEvent;
+        public event EventHandler<MessageEventArgs> MessageEvent;
 
         public void Open()
         {
@@ -50,7 +51,7 @@ namespace Tharga.PowerScan
 
                 if (_serialPort == null)
                 {
-                    Console.WriteLine("Could not automatically connect.");
+                    MessageEvent?.Invoke(this, new MessageEventArgs("Could not automatically connect."));
                     return;
                 }
             }
@@ -82,12 +83,15 @@ namespace Tharga.PowerScan
                     DataBits = _configuration.DataBits
                 };
                 serialPort.Open();
+
+                //TODO: Wait for regular data response (Like when a button is pressed or a scan performed)
                 serialPort.Write($"$+$!{Constants.End}");
                 System.Threading.Thread.Sleep(100);
                 var result = serialPort.ReadExisting();
+
                 if (result.StartsWith("BC"))
                 {
-                    Console.WriteLine(result);
+                    MessageEvent?.Invoke(this, new MessageEventArgs(result));
                     serialPort.PinChanged += _serialPort_PinChanged;
                     serialPort.ErrorReceived += _serialPort_ErrorReceived;
                     serialPort.DataReceived += SerialPortDataReceived;
@@ -101,7 +105,7 @@ namespace Tharga.PowerScan
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                MessageEvent?.Invoke(this, new MessageEventArgs(e.Message));
                 serialPort?.Dispose();
                 return null;
             }
@@ -138,31 +142,6 @@ namespace Tharga.PowerScan
             Write(data + Constants.End);
         }
 
-        //public string RaWCommand(string data, TimeSpan timeout)
-        //{
-        //    try
-        //    {
-        //        _response = null;
-        //        _interruptResponse = new AutoResetEvent(false);
-
-        //        Write(data + Constants.End);
-
-        //        _interruptResponse.WaitOne(timeout);
-
-        //        return _response;
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine(e);
-        //        throw;
-        //    }
-        //    finally
-        //    {
-        //        _interruptResponse?.Dispose();
-        //        _interruptResponse = null;
-        //    }
-        //}
-
         public void Dispose()
         {
             _serialPort?.Dispose();
@@ -177,26 +156,29 @@ namespace Tharga.PowerScan
                 var data = _buffer.TrimEnd('\r');
                 _buffer = null;
 
-                switch (data)
-                {
-                    case "S1":
-                    case "F1":
-                        ButtonPressedAction(sender, Button.F1);
-                        break;
-                    case "S2":
-                    case "F2":
-                        ButtonPressedAction(sender, Button.F2);
-                        break;
-                    case "Up":
-                        ButtonPressedAction(sender, Button.Up);
-                        break;
-                    case "Dwn":
-                    case "Down":
-                        ButtonPressedAction(sender, Button.Down);
-                        break;
-                    default:
-                        ScanAction(sender, data);
-                        break;
+                //if (_waitingForResponse)
+                //{
+                    switch (data)
+                    {
+                        case "S1":
+                        case "F1":
+                            ButtonPressedAction(sender, Button.F1);
+                            break;
+                        case "S2":
+                        case "F2":
+                            ButtonPressedAction(sender, Button.F2);
+                            break;
+                        case "Up":
+                            ButtonPressedAction(sender, Button.Up);
+                            break;
+                        case "Dwn":
+                        case "Down":
+                            ButtonPressedAction(sender, Button.Down);
+                            break;
+                        default:
+                            ScanAction(sender, data);
+                            break;
+                    //}
                 }
             }
         }
@@ -214,7 +196,7 @@ namespace Tharga.PowerScan
             var response = buttonPressedEventArgs.Wait(_responseTimeoutInMilliseconds);
             if (response.ConfirmationReceived)
             {
-                _serialPort.Write($"OK{Constants.End}");
+                _serialPort.Write($"OK{Constants.End}"); //\x0d
                 if (response.ConfirmationMessage != null)
                     _serialPort.Write(response.ConfirmationMessage.TextCommandData + Constants.End);
 
@@ -231,23 +213,30 @@ namespace Tharga.PowerScan
 
         private void ScanAction(object sender, string data)
         {
-            var scanEventArgs = new ScanEventArgs(data);
-            Task.Run(() => { ScanEvent?.Invoke(sender, scanEventArgs); });
-
-            var response = scanEventArgs.Wait(_responseTimeoutInMilliseconds);
-            if (response.ConfirmationReceived)
+            try
             {
-                _serialPort.Write($"OK{Constants.End}");
-                _serialPort.Write(response.ConfirmationMessage.TextCommandData + Constants.End);
+                var scanEventArgs = new ScanEventArgs(data);
+                Task.Run(() => { ScanEvent?.Invoke(sender, scanEventArgs); });
 
-                if (!response.IsSuccess)
+                var response = scanEventArgs.Wait(_responseTimeoutInMilliseconds);
+                if (response.ConfirmationReceived)
                 {
-                    _serialPort.Write(Constants.BeepBadReadTone + Constants.LedRedOn + Constants.End);
+                    _serialPort.Write($"OK{Constants.End}");
+                    _serialPort.Write(response.ConfirmationMessage.TextCommandData + Constants.End);
+
+                    if (!response.IsSuccess)
+                    {
+                        _serialPort.Write(Constants.BeepBadReadTone + Constants.LedRedOn + Constants.End);
+                    }
+                }
+                else
+                {
+                    ScanConfirmationNotreceivedEvent?.Invoke(this, new ScanConfirmationNotreceivedEventArgs(data));
                 }
             }
-            else
+            catch (Exception e)
             {
-                ScanConfirmationNotreceivedEvent?.Invoke(this, new ScanConfirmationNotreceivedEventArgs(data));
+                MessageEvent?.Invoke(this, new MessageEventArgs(e));
             }
         }
 

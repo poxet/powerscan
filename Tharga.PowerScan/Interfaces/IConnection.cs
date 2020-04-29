@@ -16,6 +16,7 @@ namespace Tharga.PowerScan.Interfaces
         event EventHandler<ButtonPressedEventArgs> ButtonPressedEvent;
         event EventHandler<ButtonConfirmationNotreceivedEventArgs> ButtonConfirmationNotreceivedEvent;
         event EventHandler<SignalChangedEventArgs> SignalChangedEvent;
+        event EventHandler<MessageEventArgs> MessageEvent;
         void Command(string command);
     }
 }
