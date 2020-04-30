@@ -8,8 +8,12 @@ namespace Tharga.PowerScan.Interfaces
     {
         string OpenPortName { get; }
         bool IsOpen { get; }
+        IConfiguration Configuration { get; }
+
         void Close();
-        void Open(Configuration configuration);
+        void Open(Transport configuration);
+        void Command(string command);
+
         event EventHandler<ConnectionChangedEventArgs> ConnectionChangedEvent;
         event EventHandler<ScanEventArgs> ScanEvent;
         event EventHandler<ScanConfirmationNotreceivedEventArgs> ScanConfirmationNotreceivedEvent;
@@ -17,6 +21,6 @@ namespace Tharga.PowerScan.Interfaces
         event EventHandler<ButtonConfirmationNotreceivedEventArgs> ButtonConfirmationNotreceivedEvent;
         event EventHandler<SignalChangedEventArgs> SignalChangedEvent;
         event EventHandler<MessageEventArgs> MessageEvent;
-        void Command(string command);
+        event EventHandler<ConfigurationEventArgs> ConfigurationEvent;
     }
 }

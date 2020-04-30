@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace Tharga.PowerScan.Entities
 {
-    public class Configuration
+    public class Transport
     {
-        public Configuration(string portName = null)
+        public Transport(string portName = null)
         {
             if (!string.IsNullOrEmpty(portName))
             {

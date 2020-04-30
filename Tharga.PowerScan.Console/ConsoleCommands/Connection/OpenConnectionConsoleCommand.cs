@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using Tharga.PowerScan.Entities;
 using Tharga.PowerScan.Interfaces;
 using Tharga.Toolkit.Console.Commands.Base;
 
@@ -33,7 +32,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Connection
         public override void Invoke(string[] param)
         {
             var portName = GetParam<string>("Port");
-            _connection.Open(new Configuration(portName));
+            _connection.Open(new Entities.Transport(portName));
         }
     }
 }

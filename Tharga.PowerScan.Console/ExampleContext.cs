@@ -13,8 +13,8 @@ namespace Tharga.PowerScan.Console
         public ExampleContext(ClientConsole console)
         {
             _console = console;
-            var configuration = new Configuration();
-            Connection = new Connection(configuration);
+            var transport = new Transport();
+            Connection = new Connection(transport);
 
             Connection.ScanEvent += OnScanEvent;
             Connection.ButtonPressedEvent += OnButtonPressedEvent;
@@ -23,14 +23,20 @@ namespace Tharga.PowerScan.Console
             Connection.ButtonConfirmationNotreceivedEvent += OnButtonConfirmationNotreceivedEvent;
             Connection.ScanConfirmationNotreceivedEvent += OnScanConfirmationNotreceivedEvent;
             Connection.MessageEvent += OnMessageEvent;
+            Connection.ConfigurationEvent += OnConfigurationEvent;
             if (!string.IsNullOrEmpty(Connection.OpenPortName))
             {
-                Connection.Open(configuration);
+                Connection.Open(transport);
             }
             else
             {
                 _console.OutputWarning("Not connected to any serial port. Use the connection command.");
             }
+        }
+
+        private void OnConfigurationEvent(object sender, ConfigurationEventArgs e)
+        {
+            _console.OutputInformation($"{e.Command}: {e.Response}");
         }
 
         public IConnection Connection { get; }

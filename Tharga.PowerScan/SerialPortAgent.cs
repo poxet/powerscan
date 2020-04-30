@@ -11,22 +11,22 @@ namespace Tharga.PowerScan
 {
     internal class SerialPortAgent : ISerialPortAgent
     {
-        private readonly Configuration _configuration;
+        private readonly Transport _transport;
         private SerialPort _serialPort;
         private int _responseTimeoutInMilliseconds;
         private bool _hasSignal;
 
-        public SerialPortAgent(Configuration configuration)
+        public SerialPortAgent(Transport transport)
         {
-            _configuration = configuration;
+            _transport = transport;
             MonitorConnectionState();
         }
 
         public bool IsOpen => _serialPort != null && _serialPort.IsOpen;
         private bool _lastOpenState;
         private string _buffer;
-        private bool _waitingForResponse;
-        public string PortName => _configuration.PortName;
+        private string _lastCommand;
+        public string PortName => _transport.PortName;
 
         public event EventHandler<ButtonPressedEventArgs> ButtonPressedEvent;
         public event EventHandler<ButtonConfirmationNotreceivedEventArgs> ButtonConfirmationNotreceivedEvent;
@@ -35,10 +35,11 @@ namespace Tharga.PowerScan
         public event EventHandler<SignalChangedEventArgs> SignalChangedEvent;
         public event EventHandler<ConnectionChangedEventArgs> ConnectionChangedEvent;
         public event EventHandler<MessageEventArgs> MessageEvent;
+        public event EventHandler<ConfigurationEventArgs> ConfigurationEvent;
 
         public void Open()
         {
-            var port = _configuration.PortName;
+            var port = _transport.PortName;
             if (port == "Auto")
             {
                 var ports = SerialPort.GetPortNames();
@@ -77,10 +78,10 @@ namespace Tharga.PowerScan
             {
                 serialPort = new SerialPort(port)
                 {
-                    Parity = _configuration.Parity,
-                    BaudRate = _configuration.BaudRate,
-                    StopBits = _configuration.StopBits,
-                    DataBits = _configuration.DataBits
+                    Parity = _transport.Parity,
+                    BaudRate = _transport.BaudRate,
+                    StopBits = _transport.StopBits,
+                    DataBits = _transport.DataBits
                 };
                 serialPort.Open();
 
@@ -122,7 +123,7 @@ namespace Tharga.PowerScan
         {
             if (_lastOpenState == IsOpen) return;
             _lastOpenState = IsOpen;
-            ConnectionChangedEvent?.Invoke(this, new ConnectionChangedEventArgs(IsOpen ? ConnectionChangedEventArgs.ConnectionStatus.Open : ConnectionChangedEventArgs.ConnectionStatus.Closed, _configuration.PortName));
+            ConnectionChangedEvent?.Invoke(this, new ConnectionChangedEventArgs(IsOpen ? ConnectionChangedEventArgs.ConnectionStatus.Open : ConnectionChangedEventArgs.ConnectionStatus.Closed, _transport.PortName));
         }
 
         public void Close()
@@ -139,7 +140,8 @@ namespace Tharga.PowerScan
 
         public void Command(string data)
         {
-            Write(data + Constants.End);
+            _lastCommand = data;
+            Write($"{data}{Constants.End}");
         }
 
         public void Dispose()
@@ -154,31 +156,35 @@ namespace Tharga.PowerScan
             if (_buffer.EndsWith("\r"))
             {
                 var data = _buffer.TrimEnd('\r');
+
+                if (data.StartsWith("$"))
+                {
+                    ConfigurationEvent?.Invoke(this, new ConfigurationEventArgs(_lastCommand, data));
+                    _buffer = null;
+                    return;
+                }
                 _buffer = null;
 
-                //if (_waitingForResponse)
-                //{
-                    switch (data)
-                    {
-                        case "S1":
-                        case "F1":
-                            ButtonPressedAction(sender, Button.F1);
-                            break;
-                        case "S2":
-                        case "F2":
-                            ButtonPressedAction(sender, Button.F2);
-                            break;
-                        case "Up":
-                            ButtonPressedAction(sender, Button.Up);
-                            break;
-                        case "Dwn":
-                        case "Down":
-                            ButtonPressedAction(sender, Button.Down);
-                            break;
-                        default:
-                            ScanAction(sender, data);
-                            break;
-                    //}
+                switch (data)
+                {
+                    case "S1":
+                    case "F1":
+                        ButtonPressedAction(sender, Button.F1);
+                        break;
+                    case "S2":
+                    case "F2":
+                        ButtonPressedAction(sender, Button.F2);
+                        break;
+                    case "Up":
+                        ButtonPressedAction(sender, Button.Up);
+                        break;
+                    case "Dwn":
+                    case "Down":
+                        ButtonPressedAction(sender, Button.Down);
+                        break;
+                    default:
+                        ScanAction(sender, data);
+                        break;
                 }
             }
         }

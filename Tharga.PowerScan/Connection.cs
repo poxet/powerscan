@@ -11,7 +11,7 @@ namespace Tharga.PowerScan
         {
         }
 
-        public Connection(Configuration configuration)
+        public Connection(Transport configuration)
             : this(new SerialPortAgent(configuration))
         {
         }
@@ -19,6 +19,7 @@ namespace Tharga.PowerScan
         internal Connection(ISerialPortAgent serialPortAgent)
         {
             SerialPortAgent = serialPortAgent;
+            Configuration = new Configuration(this);
         }
 
         public bool IsOpen => SerialPortAgent != null && SerialPortAgent.IsOpen;
@@ -32,6 +33,7 @@ namespace Tharga.PowerScan
         public event EventHandler<ButtonConfirmationNotreceivedEventArgs> ButtonConfirmationNotreceivedEvent;
         public event EventHandler<SignalChangedEventArgs> SignalChangedEvent;
         public event EventHandler<MessageEventArgs> MessageEvent;
+        public event EventHandler<ConfigurationEventArgs> ConfigurationEvent;
 
         public void Command(string command)
         {
@@ -39,7 +41,9 @@ namespace Tharga.PowerScan
             SerialPortAgent.Command(command);
         }
 
-        public void Open(Configuration configuration)
+        public IConfiguration Configuration { get; }
+
+        public void Open(Transport configuration)
         {
             if (IsOpen) throw new InvalidOperationException("The port is already open.");
             if (SerialPortAgent != null)
@@ -61,7 +65,8 @@ namespace Tharga.PowerScan
             SerialPortAgent.ButtonConfirmationNotreceivedEvent += ButtonConfirmationNotreceivedEvent;
             SerialPortAgent.SignalChangedEvent += SignalChangedEvent;
             SerialPortAgent.ConnectionChangedEvent += ConnectionChangedEvent;
-            SerialPortAgent.MessageEvent += (s, e) => { MessageEvent?.Invoke(s, e); };
+            SerialPortAgent.MessageEvent += MessageEvent;
+            SerialPortAgent.ConfigurationEvent += ConfigurationEvent;
             SerialPortAgent.Open();
         }
 

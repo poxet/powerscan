@@ -26,8 +26,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands
 
         public override void Invoke(string[] param)
         {
-            var index = 0;
-            var sound = QueryParam("Beep", GetParam(param, index++), new Dictionary<BeepSound, string>
+            var sound = QueryParam("Beep", param, new Dictionary<BeepSound, string>
             {
                 {BeepSound.ShortLowtone, BeepSound.ShortLowtone.ToString()},
                 {BeepSound.ShortHightone, BeepSound.ShortHightone.ToString()},

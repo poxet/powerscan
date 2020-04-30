@@ -2,18 +2,18 @@
 using Tharga.PowerScan.Interfaces;
 using Tharga.Toolkit.Console.Commands.Base;
 
-namespace Tharga.PowerScan.Console.ConsoleCommands.Configure
+namespace Tharga.PowerScan.Console.ConsoleCommands.Time
 {
-    internal class TimeConsoleCommand : ActionCommandBase
+    internal class TimeSetConsoleCommand : ActionCommandBase
     {
         private readonly IConnection _connection;
-        private readonly Time _time;
+        private readonly PowerScan.Time _time;
 
-        public TimeConsoleCommand(IConnection connection)
-            : base("Time", "Set scanner to current time and date.")
+        public TimeSetConsoleCommand(IConnection connection)
+            : base("Set", "Set scanner to current time and date.")
         {
             _connection = connection;
-            _time = new Time(connection);
+            _time = new PowerScan.Time(connection);
         }
 
         public override bool CanExecute(out string reasonMessage)
