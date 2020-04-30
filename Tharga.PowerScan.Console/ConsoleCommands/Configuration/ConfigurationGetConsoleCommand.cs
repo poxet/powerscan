@@ -18,9 +18,13 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Configuration
         {
             var command = QueryParam<string>("Command", param, new Dictionary<string, string>
             {
-                {"$cKBCO", "Country"},
-                {"$cBPVO", "Good read beep volume"}
+                {"$cBPVO", "Good Read Beep Volume"},
+                {"$cBPLE", "Good Read Beep Length" },
+                {"$cLSSP", "Green Spot Duration" },
+                {"$cLAGL", "Good Read Led Duration" },
+                //{"$cKBCO", "Country"},
             });
+            OutputInformation($"Sending command: {command}");
             _connection.Command(command);
         }
     }

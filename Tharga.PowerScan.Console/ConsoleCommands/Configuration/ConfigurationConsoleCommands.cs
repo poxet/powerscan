@@ -11,6 +11,8 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Configuration
             RegisterCommand<ConfigurationEndConsoleCommand>();
             RegisterCommand<ConfigurationGetConsoleCommand>();
             RegisterCommand<ConfigurationSetConsoleCommand>();
+            RegisterCommand<ConfigurationMuteConsoleCommand>();
+            RegisterCommand<ConfigurationLoudConsoleCommand>();
         }
     }
 }

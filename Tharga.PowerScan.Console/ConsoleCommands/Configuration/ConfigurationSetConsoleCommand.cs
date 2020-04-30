@@ -16,10 +16,13 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Configuration
 
         public override void Invoke(string[] param)
         {
-            var command = QueryParam<string>("Command", param, new Dictionary<string, string>
+            var command = QueryParam("Command", param, new Dictionary<string, string>
             {
-                {"$CKBCO", "Country"},
-                {"$CBPVO", "Good read beep volume"},
+                {"$CBPVO", "Good Read Beep Volume"},
+                {"$CBPLE", "Good Read Beep Length" },
+                {"$CLSSP", "Green Spot Duration" },
+                {"$CLAGL", "Good Read Led Duration" },
+                //{"$CKBCO", "Country"},
             });
             var value = QueryParam<string>("Value", param);
             if (value.Length != 2)
@@ -34,6 +37,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Configuration
             //    {"02", "Medium"},
             //    {"03", "High"},
             //});
+            OutputInformation($"Sending command: {command}{value}");
             _connection.Command($"{command}{value}");
         }
     }
