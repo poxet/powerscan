@@ -4,6 +4,8 @@
     {
         public static string Padd(this string item, int length)
         {
+            if (item == null) return null;
+
             if (item.Length > length)
             {
                 return item.Substring(0, length);

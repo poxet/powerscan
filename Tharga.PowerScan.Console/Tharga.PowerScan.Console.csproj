@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Castle.Windsor" Version="5.0.1" />
-    <PackageReference Include="Tharga.Toolkit.Console" Version="3.0.67" />
+    <PackageReference Include="Tharga.Toolkit.Console" Version="3.0.90" />
   </ItemGroup>
 
   <ItemGroup>

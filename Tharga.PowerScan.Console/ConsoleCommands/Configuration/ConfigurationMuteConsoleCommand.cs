@@ -16,6 +16,9 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Configuration
         public override void Invoke(string[] param)
         {
             _connection.Command("$CBPVO00"); //Good Read Beep Volume
+            _connection.Command("$CBTAB00"); //Ack Beep
+            _connection.Command("$CBPFR00"); //Good Read Beep Frequenzy
+            _connection.Command("$CBPPU00"); //Power On Alter
         }
     }
 }
