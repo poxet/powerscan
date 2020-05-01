@@ -1,5 +1,6 @@
 ﻿using System;
 using Tharga.PowerScan.Interfaces;
+using Tharga.PowerScan.Menu;
 using Tharga.Toolkit.Console.Commands.Base;
 
 namespace Tharga.PowerScan.Console.ConsoleCommands.Simulator
@@ -18,15 +19,15 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Simulator
         {
             //NOTE: Build menu tree for the simulator.
             var line1 = string.Empty;
-            var menu = new Menu((sender, data) =>
+            var menu = new MainMenu((sender, data) =>
             {
                 line1 = data;
                 switch (data)
                 {
-                    case Menu.Constants.Up:
-                    case Menu.Constants.Down:
-                    case Menu.Constants.Select:
-                    case Menu.Constants.Back:
+                    case Constants.Up:
+                    case Constants.Down:
+                    case Constants.Select:
+                    case Constants.Back:
                         break;
                     default:
                         if (data.ToLower().StartsWith("a"))
@@ -48,11 +49,11 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Simulator
 
                 switch (data)
                 {
-                    case Menu.Constants.Up:
-                    case Menu.Constants.Down:
-                    case Menu.Constants.Select:
+                    case Constants.Up:
+                    case Constants.Down:
+                    case Constants.Select:
                         break;
-                    case Menu.Constants.Back:
+                    case Constants.Back:
                         line2 = string.Empty;
                         sender.Menu.Select(string.Empty);
                         break;

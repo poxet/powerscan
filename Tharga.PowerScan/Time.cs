@@ -16,11 +16,11 @@ namespace Tharga.PowerScan
         {
             //Date
             var dt = time.ToString("dd-MM-yy").Replace("-", "/");
-            _connection.SerialPortAgent.Write($"\x12\x1b[0p{dt}\x0d");
+            _connection.SerialPortAgent.Command($"{Constants.Date}{dt}");
 
             //Time
             var tm = time.ToShortTimeString().Replace(":", string.Empty);
-            _connection.SerialPortAgent.Write($"\x12\x1b[1p{tm}\x0d");
+            _connection.SerialPortAgent.Command($"{Constants.Time}{tm}");
         }
     }
 }

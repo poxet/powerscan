@@ -18,10 +18,10 @@ namespace Tharga.PowerScan
             switch (colour)
             {
                 case LightColor.Green:
-                    _connection?.SerialPortAgent.Write("\x12\x1b[6q\x0d"); // Color Green
+                    _connection?.SerialPortAgent.Command(Constants.LedGreenOn); // Color Green
                     break;
                 case LightColor.Red:
-                    _connection?.SerialPortAgent.Write("\x12\x1b[8q\x0d"); // Color Red
+                    _connection?.SerialPortAgent.Command(Constants.LedRedOn); // Color Red
                     break;
                 default:
                     throw new ArgumentOutOfRangeException($"The color {colour} is not supported.");

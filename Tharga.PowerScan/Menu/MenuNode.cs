@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Tharga.PowerScan
+namespace Tharga.PowerScan.Menu
 {
     public class MenuNode : NodeBase
     {

@@ -1,4 +1,5 @@
-﻿using Tharga.PowerScan.Interfaces;
+﻿using System.Collections.Generic;
+using Tharga.PowerScan.Interfaces;
 using Tharga.Toolkit.Console.Commands.Base;
 
 namespace Tharga.PowerScan.Console.ConsoleCommands
@@ -24,8 +25,20 @@ namespace Tharga.PowerScan.Console.ConsoleCommands
 
         public override void Invoke(string[] param)
         {
-            var input = QueryParam<string>("Text", param);
-            var dt = new DisplayText(new[] { input, "B", null, "", "D" });
+            var row = QueryParam("Row", param, new Dictionary<int, string>
+            {
+                {0, "0"},
+                {1, "1"},
+                {2, "2"},
+                {3, "3"},
+                {4, "4"}
+            });
+
+            var text = QueryParam<string>("Text", param);
+            var font = QueryParam<DisplayText.FontSize>("Font", param);
+
+            var dt = new DisplayText();
+            dt.SetText(row, text, font);
             _text.WriteText(dt);
         }
     }

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Linq;
 
-namespace Tharga.PowerScan
+namespace Tharga.PowerScan.Menu
 {
     public class SubMenu : NodeBase
     {
         private NodeBase _entered;
         private int _index;
-        private Menu _menu;
+        private MainMenu _menu;
 
         public SubMenu(string name, Action<NodeBase, string> handler = null)
             : base(name, handler)
@@ -15,13 +15,13 @@ namespace Tharga.PowerScan
             _entered = this;
         }
 
-        public override Menu Menu => _menu;
+        public override MainMenu Menu => _menu;
         public override string Path => Selected.Path;
 
         private NodeBase Entered => _entered;
         public NodeBase Selected => Entered.Nodes.Any() ? Entered.Nodes[_index] : this;
 
-        internal void SetRoot(Menu menu)
+        internal void SetRoot(MainMenu menu)
         {
             _menu = menu;
         }
@@ -30,7 +30,7 @@ namespace Tharga.PowerScan
         {
             if (Entered.Nodes.Length <= 1)
             {
-                Selected.Handle(Menu.Constants.Up);
+                Selected.Handle(Constants.Up);
                 return;
             }
 
@@ -43,7 +43,7 @@ namespace Tharga.PowerScan
         {
             if (Entered.Nodes.Length <= 1)
             {
-                Selected.Handle(Menu.Constants.Down);
+                Selected.Handle(Constants.Down);
                 return;
             }
 
@@ -56,7 +56,7 @@ namespace Tharga.PowerScan
         {
             if (Entered.Nodes.Length == 0)
             {
-                Selected.Handle(Menu.Constants.Select);
+                Selected.Handle(Constants.Select);
             }
             else if (Entered.Nodes[_index].Nodes.Any())
             {
@@ -65,7 +65,7 @@ namespace Tharga.PowerScan
             }
             else
             {
-                Selected.Handle(Menu.Constants.Select);
+                Selected.Handle(Constants.Select);
                 //TODO: Indicate invalid selection
             }
         }
@@ -85,7 +85,7 @@ namespace Tharga.PowerScan
             }
             else
             {
-                Selected.Handle(Menu.Constants.Back);
+                Selected.Handle(Constants.Back);
                 //TODO: Indicate invalid selection
             }
         }

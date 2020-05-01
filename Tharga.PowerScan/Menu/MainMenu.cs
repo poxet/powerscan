@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Tharga.PowerScan
+namespace Tharga.PowerScan.Menu
 {
-    public class Menu
+    public class MainMenu
     {
         private SubMenu _selectedMenu;
         private readonly Dictionary<string, SubMenu> _subMenus = new Dictionary<string, SubMenu>();
 
-        public Menu(Action<NodeBase, string> defaultHandler = null)
+        public MainMenu(Action<NodeBase, string> defaultHandler = null)
         {
-            _selectedMenu = new SubMenu(String.Empty, defaultHandler);
+            _selectedMenu = new SubMenu(string.Empty, defaultHandler);
             _selectedMenu.SetRoot(this);
             _subMenus.Add(_selectedMenu.Name, _selectedMenu);
-        }
-
-        public static class Constants
-        {
-            public const string Up = "Up";
-            public const string Down = "Down";
-            public const string Select = "Select";
-            public const string Back = "Back";
         }
 
         public string Name => _selectedMenu.Name;
@@ -72,7 +64,7 @@ namespace Tharga.PowerScan
             _selectedMenu.Select(path);
         }
 
-        public Menu AddSubMenu(SubMenu subMenu)
+        public MainMenu AddSubMenu(SubMenu subMenu)
         {
             if (String.IsNullOrEmpty(subMenu.Name)) throw new ArgumentNullException(nameof(subMenu.Name), "No name set for submenu.");
 

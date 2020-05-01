@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Tharga.PowerScan
+namespace Tharga.PowerScan.Menu
 {
     public abstract class NodeBase
     {
@@ -18,7 +18,7 @@ namespace Tharga.PowerScan
         private readonly List<MenuNode> _nodes = new List<MenuNode>();
         protected internal NodeBase[] Nodes => _nodes.ToArray<NodeBase>();
         protected internal NodeBase Parent { get; internal set; }
-        public virtual Menu Menu => Parent.Menu;
+        public virtual MainMenu Menu => Parent.Menu;
         public virtual string Path => GetPath(true);
 
         public void Handle(string data)
@@ -57,7 +57,7 @@ namespace Tharga.PowerScan
         {
             var acceptNode = new MenuNode(accept, (s,d) =>
             {
-                if (d == Menu.Constants.Select)
+                if (d == Constants.Select)
                     handler.Invoke(s, d);
                 else
                     Handle(s, d);
@@ -66,7 +66,7 @@ namespace Tharga.PowerScan
 
             var rejectNode = new MenuNode(reject, (s, d) =>
             {
-                if (d == Menu.Constants.Select)
+                if (d == Constants.Select)
                     s.Menu.Back();
                 else
                     Handle(s, d);

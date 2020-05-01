@@ -14,7 +14,7 @@ namespace Tharga.PowerScan
             Medium
         }
 
-        private const int MaximumNumberOfLines = 5;
+        private const int MaximumNumberOfLines = 6;
 
         private readonly Tuple<FontSize, string>[] _lines;
 
@@ -31,7 +31,7 @@ namespace Tharga.PowerScan
         public DisplayText(IEnumerable<Tuple<FontSize, string>> lines)
         {
             _lines = new Tuple<FontSize, string>[MaximumNumberOfLines];
-            Clear();
+            Initiate(null);
 
             var i = 0;
             foreach (var line in lines)
@@ -54,11 +54,11 @@ namespace Tharga.PowerScan
                 foreach (var line in _lines)
                 {
                     row++;
-                    sb.Append(Constants.Esc + $"[{row};1H"); //Place in position
-                    sb.Append(GetFontCommand(line.Item1)); //Set font
-                    sb.Append(Constants.Esc + "[2D");
                     if (line.Item2 != null)
                     {
+                        sb.Append(Constants.Esc + $"[{row};1H"); //Place in position
+                        sb.Append(GetFontCommand(line.Item1)); //Set font
+                        sb.Append(Constants.Esc + "[2D");
                         var count = GetNumberOfCharsOnLine(line.Item1) - line.Item2.Length;
                         if (count < 0) count = 0;
                         sb.Append(line.Item2 + new string(' ', count));
@@ -100,11 +100,17 @@ namespace Tharga.PowerScan
             }
         }
 
-        public void Clear()
+        public DisplayText Clear()
+        {
+            Initiate(string.Empty);
+            return this;
+        }
+
+        private void Initiate(string defaultData)
         {
             for (var i = 0; i < _lines.Length; i++)
             {
-                _lines[i] = GetEmptyLine();
+                _lines[i] = GetNewLine(defaultData);
             }
         }
 
@@ -113,7 +119,7 @@ namespace Tharga.PowerScan
             return _lines[lineNumber].Item2;
         }
 
-        public void SetText(int lineNumber, string data, FontSize fontSize, bool truncate = true)
+        public DisplayText SetText(int lineNumber, string data, FontSize fontSize, bool truncate = true)
         {
             if (lineNumber < 0 && !truncate) throw new InvalidOperationException("The line number needs to be at least 0.");
             if (lineNumber > NumberOfLines - 1 && !truncate) throw new InvalidOperationException("The line number is outside of the display.");
@@ -139,8 +145,8 @@ namespace Tharga.PowerScan
                         throw new InvalidOperationException("Data with large font cannot be used on the last line.");
                     }
 
-                    _lines[lineNumber] = GetEmptyLine();
-                    return;
+                    _lines[lineNumber] = GetNewLine(string.Empty);
+                    return this;
                 }
 
                 //If we are using the font size large, it takes up two lines. Therefore the line after should be clered.
@@ -151,7 +157,7 @@ namespace Tharga.PowerScan
                 //If writing small text. Check if there was large text there before, if so, clear the line after that too.
                 if (_lines[lineNumber].Item1 == FontSize.Large)
                 {
-                    _lines[lineNumber + 1] = GetEmptyLine();
+                    _lines[lineNumber + 1] = GetNewLine(string.Empty);
                 }
 
                 //If the line above was large text, then clear that line too
@@ -159,18 +165,19 @@ namespace Tharga.PowerScan
                 {
                     if (_lines[lineNumber - 1].Item1 == FontSize.Large)
                     {
-                        _lines[lineNumber - 1] = GetEmptyLine();
+                        _lines[lineNumber - 1] = GetNewLine(string.Empty);
                     }
                 }
             }
 
-            _lines[lineNumber] = new Tuple<FontSize, string>(fontSize, data); // + new string('-', GetNumberOfCharsOnLine(fontSize) - data.Length + 1));
+            _lines[lineNumber] = new Tuple<FontSize, string>(fontSize, data);
+
+            return this;
         }
 
-        private Tuple<FontSize, string> GetEmptyLine()
+        private Tuple<FontSize, string> GetNewLine(string defaultData)
         {
-            //return new Tuple<FontSize, string>(FontSize.Normal, new string('.', GetNumberOfCharsOnLine(FontSize.Normal)));
-            return new Tuple<FontSize, string>(FontSize.Normal, string.Empty);
+            return new Tuple<FontSize, string>(FontSize.Normal, defaultData);
         }
     }
 }

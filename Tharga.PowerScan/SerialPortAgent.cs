@@ -202,7 +202,7 @@ namespace Tharga.PowerScan
             var response = buttonPressedEventArgs.Wait(_responseTimeoutInMilliseconds);
             if (response.ConfirmationReceived)
             {
-                _serialPort.Write($"OK{Constants.End}"); //\x0d
+                _serialPort.Write($"OK{Constants.End}");
                 if (response.ConfirmationMessage != null)
                     _serialPort.Write(response.ConfirmationMessage.TextCommandData + Constants.End);
 

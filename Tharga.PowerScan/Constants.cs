@@ -15,7 +15,8 @@
         public const string LedGreenOff = Esc + "[7q"; //Turn off green led
         public const string LedRedOn = Esc + "[8q"; //Turn on red led
         public const string LedRedOff = Esc + "[9q"; //Turn off red led
-
+        public const string Date = Esc + "[0p"; //Set Date
+        public const string Time = Esc + "[1p"; //Set Time
         public const string ClearEntireDisplay = Esc + "[2J"; //Clears entire display and moves cursor to top left
         public const string FontLarge = Esc + "#4"; //Sets font to Large
         public const string FontNormal = Esc + "#5"; //Sets font to Normal
