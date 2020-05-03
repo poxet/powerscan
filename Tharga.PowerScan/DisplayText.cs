@@ -54,20 +54,36 @@ namespace Tharga.PowerScan
                 foreach (var line in _lines)
                 {
                     row++;
-                    if (line.Item2 != null)
+                    var text = Replace(line.Item2, new Dictionary<string, string>
+                    {
+                        {"å", "a"}, {"ä", "a"}, {"ö", "o"},
+                        {"Å", "A"}, {"Ä", "A"}, {"Ö", "O"},
+                        {"'", ""}
+                    });
+                    if (text != null)
                     {
                         sb.Append(Constants.Esc + $"[{row};1H"); //Place in position
                         sb.Append(GetFontCommand(line.Item1)); //Set font
                         sb.Append(Constants.Esc + "[2D");
-                        var count = GetNumberOfCharsOnLine(line.Item1) - line.Item2.Length;
+                        var count = GetNumberOfCharsOnLine(line.Item1) - text.Length;
                         if (count < 0) count = 0;
-                        sb.Append(line.Item2 + new string(' ', count));
+                        sb.Append(text + new string(' ', count));
                     }
                 }
 
                 var response = sb.ToString();
                 return response;
             }
+        }
+
+        private string Replace(string data, Dictionary<string, string> chars)
+        {
+            foreach (var c in chars)
+            {
+                data = data.Replace(c.Key, c.Value);
+            }
+
+            return data;
         }
 
         public int GetNumberOfCharsOnLine(FontSize fontSize)
@@ -103,6 +119,7 @@ namespace Tharga.PowerScan
         public DisplayText Clear()
         {
             Initiate(string.Empty);
+            SetText(MaximumNumberOfLines - 1, null, FontSize.Normal);
             return this;
         }
 
@@ -123,7 +140,7 @@ namespace Tharga.PowerScan
         {
             if (lineNumber < 0 && !truncate) throw new InvalidOperationException("The line number needs to be at least 0.");
             if (lineNumber > NumberOfLines - 1 && !truncate) throw new InvalidOperationException("The line number is outside of the display.");
-            if (data.Length > GetNumberOfCharsOnLine(fontSize))
+            if (data != null && data.Length > GetNumberOfCharsOnLine(fontSize))
             {
                 if (truncate)
                 {

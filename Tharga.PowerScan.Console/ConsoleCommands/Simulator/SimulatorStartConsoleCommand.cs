@@ -19,7 +19,7 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Simulator
         {
             //NOTE: Build menu tree for the simulator.
             var line1 = string.Empty;
-            var menu = new MainMenu((sender, data) =>
+            var menu = new MainMenu(async (sender, data) =>
             {
                 line1 = data;
                 switch (data)
@@ -36,14 +36,16 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Simulator
                             sender.Menu.Select("SubB");
                         break;
                 }
+
+                return null;
             });
 
             menu.AddNode(new MenuNode("A").AddNode(new MenuNode("A1").AddNode(new MenuNode("A11"))));
-            menu.AddNode(new MenuNode("B", (sender, data) => { }).AddNode(new MenuNode("B1")));
-            menu.AddNode(new MenuNode("C", (sender, data) => { }).AddConfirm("Yes", "No", (sender, data) => { }, true));
+            menu.AddNode(new MenuNode("B", async (sender, data) => { return null; }).AddNode(new MenuNode("B1")));
+            menu.AddNode(new MenuNode("C", async (sender, data) => { return null; }).AddConfirm("Yes", "No", async (sender, data) => { return null; }, true));
 
             var line2 = string.Empty;
-            var subA = new SubMenu("SubA", (sender, data) =>
+            var subA = new SubMenu("SubA", async (sender, data) =>
             {
                 line2 = data;
 
@@ -61,12 +63,14 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Simulator
                         //TODO: Do some stuff
                         break;
                 }
+
+                return null;
             });
-            subA.AddNode(new MenuNode("Info").AddConfirm("Ok", "Cancel", (sender, data) => { }));
+            subA.AddNode(new MenuNode("Info").AddConfirm("Ok", "Cancel"));
             menu.AddSubMenu(subA).AddSubMenu(new SubMenu("B"));
 
-            var subB = new SubMenu("SubB", (s, e) => { });
-            subB.AddConfirm("Ja", "Nej", (s, d) => { s.Menu.Select(null); });
+            var subB = new SubMenu("SubB", async (s, e) => { return null; });
+            subB.AddConfirm("Ja", "Nej");
             menu.AddSubMenu(subB);
 
             var buffer = string.Empty;
@@ -83,14 +87,15 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Simulator
                 });
 
                 System.Console.Clear();
-                OutputInformation("-----------------------");
-                OutputInformation($"|{dt.GetText(0).Padd(21)}|");
-                OutputInformation($"|{dt.GetText(1).Padd(21)}|");
-                OutputInformation($"|{dt.GetText(2).Padd(21)}|");
-                OutputInformation($"|{dt.GetText(3).Padd(21)}|");
-                OutputInformation($"|{dt.GetText(4).Padd(21)}|");
-                OutputInformation("|    S1T       S2T    |");
-                OutputInformation("-----------------------");
+                OutputInformation("------------------------");
+                OutputInformation($"|{dt.GetText(0).Padd(22)}|");
+                OutputInformation($"|{dt.GetText(1).Padd(22)}|");
+                OutputInformation($"|{dt.GetText(2).Padd(22)}|");
+                OutputInformation($"|{dt.GetText(3).Padd(22)}|");
+                OutputInformation($"|{dt.GetText(4).Padd(22)}|");
+                var text = dt.GetText(5) ?? "    S1T       S2T     ";
+                OutputInformation($"|{text.Padd(22)}|");
+                OutputInformation("------------------------");
                 OutputInformation($"Buffer: {buffer}");
 
                 var key = QueryKey();

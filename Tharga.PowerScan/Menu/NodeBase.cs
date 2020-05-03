@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Tharga.PowerScan.Menu
 {
     public abstract class NodeBase
     {
-        private readonly Action<NodeBase, string> _handler;
+        private readonly Func<NodeBase, string, Task<HandlerResult>> _handler;
 
-        protected NodeBase(string name, Action<NodeBase, string> handler)
+        protected NodeBase(string name, Func<NodeBase, string, Task<HandlerResult>> handler)
         {
             _handler = handler;
             Name = name;
@@ -21,19 +22,20 @@ namespace Tharga.PowerScan.Menu
         public virtual MainMenu Menu => Parent.Menu;
         public virtual string Path => GetPath(true);
 
-        public void Handle(string data)
+        public Task<HandlerResult> Handle(string data)
         {
-            Handle(this, data);
+            return Handle(this, data);
         }
 
-        protected void Handle(NodeBase sender, string data)
+        protected Task<HandlerResult> Handle(NodeBase sender, string data)
         {
             if (_handler != null)
-                _handler.Invoke(sender, data);
-            else if (Parent != null)
-                Parent.Handle(sender, data);
-            else
-                throw new InvalidOperationException("No handler registered for menu.");
+                return _handler.Invoke(sender, data);
+
+            if (Parent != null)
+                return Parent.Handle(sender, data);
+
+            throw new InvalidOperationException("No handler registered for menu.");
         }
 
         protected string GetPath(bool moreMarker)
@@ -53,23 +55,23 @@ namespace Tharga.PowerScan.Menu
             return this as MenuNode;
         }
 
-        public MenuNode AddConfirm(string accept = "Yes", string reject = "No", Action<NodeBase, string> handler = null, bool acceptAsDefault = false)
+        public MenuNode AddConfirm(string accept = "Yes", string reject = "No", Func<NodeBase, string, Task<HandlerResult>> handler = null, bool acceptAsDefault = false)
         {
-            var acceptNode = new MenuNode(accept, (s,d) =>
+            var acceptNode = new MenuNode(accept, (s, d) =>
             {
-                if (d == Constants.Select)
-                    handler.Invoke(s, d);
-                else
-                    Handle(s, d);
+                if (d == Constants.Select && handler != null)
+                    return handler.Invoke(s, d);
+
+                return Handle(s, d);
             });
             acceptNode.SetParent(this);
 
             var rejectNode = new MenuNode(reject, (s, d) =>
             {
                 if (d == Constants.Select)
-                    s.Menu.Back();
-                else
-                    Handle(s, d);
+                    return s.Menu.Back();
+
+                return Handle(s, d);
             });
             rejectNode.SetParent(this);
 

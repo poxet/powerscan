@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Tharga.PowerScan.Menu
 {
@@ -9,7 +10,7 @@ namespace Tharga.PowerScan.Menu
         private int _index;
         private MainMenu _menu;
 
-        public SubMenu(string name, Action<NodeBase, string> handler = null)
+        public SubMenu(string name, Func<NodeBase, string, Task<HandlerResult>> handler = null)
             : base(name, handler)
         {
             _entered = this;
@@ -26,51 +27,54 @@ namespace Tharga.PowerScan.Menu
             _menu = menu;
         }
 
-        public void Up()
+        public async Task<HandlerResult> Up()
         {
             if (Entered.Nodes.Length <= 1)
             {
-                Selected.Handle(Constants.Up);
-                return;
+                return await Selected.Handle(Constants.Up);
             }
 
             _index--;
             if (_index < 0)
                 _index = Entered.Nodes.Length - 1;
+
+            return null;
         }
 
-        public void Down()
+        public async Task<HandlerResult> Down()
         {
             if (Entered.Nodes.Length <= 1)
             {
-                Selected.Handle(Constants.Down);
-                return;
+                return await Selected.Handle(Constants.Down);
             }
 
             _index++;
             if (_index >= Entered.Nodes.Length)
                 _index = 0;
+
+            return null;
         }
 
-        public void Select()
+        public async Task<HandlerResult> Select()
         {
             if (Entered.Nodes.Length == 0)
             {
-                Selected.Handle(Constants.Select);
+                return await Selected.Handle(Constants.Select);
             }
             else if (Entered.Nodes[_index].Nodes.Any())
             {
                 _entered = Entered.Nodes[_index];
                 _index = 0;
+                return null;
             }
             else
             {
-                Selected.Handle(Constants.Select);
+                return await Selected.Handle(Constants.Select);
                 //TODO: Indicate invalid selection
             }
         }
 
-        public void Back()
+        public async Task<HandlerResult> Back()
         {
             if (Entered.Parent != null)
             {
@@ -85,9 +89,11 @@ namespace Tharga.PowerScan.Menu
             }
             else
             {
-                Selected.Handle(Constants.Back);
+                return await Selected.Handle(Constants.Back);
                 //TODO: Indicate invalid selection
             }
+
+            return null;
         }
 
         public void Select(string path)
