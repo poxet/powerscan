@@ -78,6 +78,8 @@ namespace Tharga.PowerScan
 
         private string Replace(string data, Dictionary<string, string> chars)
         {
+            if (data == null) return null;
+
             foreach (var c in chars)
             {
                 data = data.Replace(c.Key, c.Value);
