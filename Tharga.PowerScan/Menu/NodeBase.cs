@@ -27,13 +27,20 @@ namespace Tharga.PowerScan.Menu
             return Handle(this, data);
         }
 
-        protected Task<HandlerResult> Handle(NodeBase sender, string data)
+        protected async Task<HandlerResult> Handle(NodeBase sender, string data)
         {
             if (_handler != null)
-                return _handler.Invoke(sender, data);
+            {
+                var r1 = await _handler.Invoke(sender, data);
+                if (r1 != null || Parent == null)
+                    return r1;
+            }
 
             if (Parent != null)
-                return Parent.Handle(sender, data);
+            {
+                var r2 = await Parent.Handle(sender, data);
+                return r2;
+            }
 
             throw new InvalidOperationException("No handler registered for menu.");
         }

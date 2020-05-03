@@ -66,8 +66,8 @@ namespace Tharga.PowerScan.Console.ConsoleCommands.Simulator
 
                 return null;
             });
-            subA.AddNode(new MenuNode("Info").AddConfirm("Ok", "Cancel"));
-            menu.AddSubMenu(subA).AddSubMenu(new SubMenu("B"));
+            subA.AddNode(new MenuNode("Info", async (s, d) => { return null; }).AddConfirm("Ok", "Cancel"));
+            menu.AddSubMenu(subA).AddSubMenu(new SubMenu("Ax", async (s, d) => { return null; }));
 
             var subB = new SubMenu("SubB", async (s, e) => { return null; });
             subB.AddConfirm("Ja", "Nej");
